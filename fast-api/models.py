@@ -1,26 +1,14 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+import datetime as _dt
+import sqlalchemy as _sql
 
-Base = declarative_base()
-
-class Book(Base):
-    __tablename__ = "book"
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    rating = Column(Integer)
-    time_created = Column(DateTime(timezone=True), server_default=func.now())
-    time_updated = Column(DateTime(timezone=True), onupdate=func.now())
-    author_id = Column(Integer, ForeignKey("author.id"))
-
-    author = relationship("Author")
+import database as _database
 
 
-class Author(Base):
-    __tablename__ = "author"
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    age = Column(Integer)
-    time_created = Column(DateTime(timezone=True), server_default=func.now())
-    time_updated = Column(DateTime(timezone=True), onupdate=func.now())
+class Contact(_database.Base):
+    __tablename__ = "contacts"
+    id = _sql.Column(_sql.Integer, primary_key=True, index=True)
+    first_name = _sql.Column(_sql.String, index=True)
+    last_name = _sql.Column(_sql.String, index=True)
+    email = _sql.Column(_sql.String, index=True, unique=True)
+    phone_number = _sql.Column(_sql.String, index=True, unique=True)
+    date_created = _sql.Column(_sql.DateTime, default=_dt.datetime.utcnow)

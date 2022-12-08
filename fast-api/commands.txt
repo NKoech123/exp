@@ -1,0 +1,15 @@
+
+#pull image
+docker pull postgres:alpine
+
+#show all images
+docker images
+
+#create docker container named fastapi-postgres
+docker run --name fastapi-postgres -e POSTGRES_PASSWORD=password -d -p 5432:5432 postgres:alpine
+
+#show all containers
+docker ps
+
+#get into the fastapi-postgres (container database)
+docker exec -it fastapi-postgres bash

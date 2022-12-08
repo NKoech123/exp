@@ -1,61 +1,63 @@
-import os
+from typing import TYPE_CHECKING, List
+import fastapi as _fastapi
+import sqlalchemy.orm as _orm
 
-import uvicorn
-from dotenv import load_dotenv
-from fastapi import FastAPI
-from fastapi_sqlalchemy import DBSessionMiddleware, db
+import schemas as _schemas
+import services as _services
 
-from models import Author
-from models import Author as ModelAuthor
-from models import Book
-from models import Book as ModelBook
-from schema import Author as SchemaAuthor
-from schema import Book as SchemaBook
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
-load_dotenv(".env")
-
-app = FastAPI()
-
-app.add_middleware(DBSessionMiddleware, db_url=os.environ["DATABASE_URL"])
+app = _fastapi.FastAPI()
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.post("/api/contacts/", response_model=_schemas.Contact)
+async def create_contact(
+    contact: _schemas.CreateContact,
+    db: _orm.Session = _fastapi.Depends(_services.get_db),
+):
+    return await _services.create_contact(contact=contact, db=db)
 
 
-@app.post("/add-book/", response_model=SchemaBook)
-def add_book(book: SchemaBook):
-    db_book = ModelBook(title=book.title, rating=book.rating, author_id=book.author_id)
-    db.session.add(db_book)
-    db.session.commit()
-    return db_book
+@app.get("/api/contacts/", response_model=List[_schemas.Contact])
+async def get_contacts(db: _orm.Session = _fastapi.Depends(_services.get_db)):
+    return await _services.get_all_contacts(db=db)
 
 
-@app.post("/add-author/", response_model=SchemaAuthor)
-def add_author(author: SchemaAuthor):
-    db_author = ModelAuthor(name=author.name, age=author.age)
-    db.session.add(db_author)
-    db.session.commit()
-    return db_author
+@app.get("/api/contacts/{contact_id}/", response_model=_schemas.Contact)
+async def get_contact(
+    contact_id: int, db: _orm.Session = _fastapi.Depends(_services.get_db)
+):
+    contact = await _services.get_contact(db=db, contact_id=contact_id)
+    if contact is None:
+        raise _fastapi.HTTPException(status_code=404, detail="Contact does not exist")
+
+    return contact
 
 
-@app.get("/books/")
-def get_books():
-    books = db.session.query(Book).all()
+@app.delete("/api/contacts/{contact_id}/")
+async def delete_contact(
+    contact_id: int, db: _orm.Session = _fastapi.Depends(_services.get_db)
+):
+    contact = await _services.get_contact(db=db, contact_id=contact_id)
+    if contact is None:
+        raise _fastapi.HTTPException(status_code=404, detail="Contact does not exist")
 
-    return books
+    await _services.delete_contact(contact, db=db)
 
-
-# @app.post("/user/", response_model=SchemaUser)
-# def create_user(user: SchemaUser):
-#     db_user = ModelUser(
-#         first_name=user.first_name, last_name=user.last_name, age=user.age
-#     )
-#     db.session.add(db_user)
-#     db.session.commit()
-#     return db_user
+    return "successfully deleted the user"
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+@app.put("/api/contacts/{contact_id}/", response_model=_schemas.Contact)
+async def update_contact(
+    contact_id: int,
+    contact_data: _schemas.CreateContact,
+    db: _orm.Session = _fastapi.Depends(_services.get_db),
+):
+    contact = await _services.get_contact(db=db, contact_id=contact_id)
+    if contact is None:
+        raise _fastapi.HTTPException(status_code=404, detail="Contact does not exist")
+
+    return await _services.update_contact(
+        contact_data=contact_data, contact=contact, db=db
+    )
