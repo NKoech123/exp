@@ -13,3 +13,12 @@ docker ps
 
 #get into the fastapi-postgres (container database)
 docker exec -it fastapi-postgres bash
+
+#get into postgres cli
+psql -U postgres
+
+#in postgres cli, create database
+create database fastapi-database;
+
+# make database available outside the container
+psql -h localhost -p 5432 postgres
