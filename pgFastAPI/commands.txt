@@ -1,0 +1,4 @@
+docker-compose up
+
+
+pip3 freeze > requirements.txt
