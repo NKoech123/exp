@@ -9,8 +9,8 @@ from models import Author
 from models import Author as ModelAuthor
 from models import Book
 from models import Book as ModelBook
-# from schema import Author as SchemaAuthor
-# from schema import Book as SchemaBook
+from schema import Author as SchemaAuthor
+from schema import Book as SchemaBook
 
 load_dotenv(".env")
 
