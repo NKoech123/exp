@@ -13,7 +13,6 @@ from schema import Book as SchemaBook
 load_dotenv(".env")
 
 app = FastAPI()
-
 app.add_middleware(DBSessionMiddleware, db_url=os.environ["DATABASE_URL"])
 
 

@@ -7,3 +7,5 @@ docker-compose run app alembic upgrade head
 
 docker-compose build -to build image
 docker-compose up
+
+docker exec -it 6c641155f0f3 sh
